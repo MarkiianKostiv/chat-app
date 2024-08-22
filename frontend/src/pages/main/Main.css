@@ -1,0 +1,130 @@
+.main-page-container {
+  width: 100%;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  background-color: #fff;
+  color: #000;
+  height: 100vh;
+}
+
+.users-container {
+  width: 30%;
+  height: 100vh;
+  display: flex;
+  align-items: start;
+  justify-content: start;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.chat-controls {
+  background-color: #f5f5f5;
+  width: 100%;
+  border-right: 1px solid #dcdcdc;
+  border-bottom: 1px solid #dcdcdc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+}
+.search-input-container {
+  width: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.search-input {
+  width: 100%;
+  display: flex;
+  border-radius: 16px;
+  background-color: #fff;
+  color: #000;
+  padding: 8px;
+}
+
+.profile-container {
+  width: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.profile-container > a {
+  background-color: #fff;
+  color: #8abec9;
+  border-radius: 16px;
+  padding: 8px 6px 6px 8px;
+  cursor: pointer;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid #e8e8e8;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.profile-container > a:hover {
+  background-color: #8abec9; /* Change background on hover */
+  color: #fff; /* Change text color on hover */
+}
+
+.profile-container > a:active {
+  background-color: #6aa4b0; /* Slightly darker background for active state */
+  color: #fff; /* Keep text color consistent on active */
+}
+
+.chats-container {
+  background-color: #fff;
+  width: 100%;
+  border-right: 1px solid #dcdcdc;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  flex-direction: column;
+}
+.chats-container > h3 {
+  margin-left: 10px;
+  color: #8abec9;
+}
+
+.chats-container > ul {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+}
+.chats-container > ul > li {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid #dcdcdc;
+}
+
+.chat-container {
+  width: 70%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  flex-direction: column;
+}
+
+.chat-header {
+  width: 100%;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  border-bottom: 1px solid #dcdcdc;
+  /* border-left: 1px solid #dcdcdc; */
+}
+
+.chat {
+  background-color: #faf8f9;
+  width: 100%;
+  height: 85%;
+}
