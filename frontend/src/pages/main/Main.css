@@ -35,7 +35,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
+
+.search-icon-container {
+  position: absolute;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
 .search-input {
   width: 100%;
   display: flex;
@@ -43,6 +53,7 @@
   background-color: #fff;
   color: #000;
   padding: 8px;
+  padding-left: 45px;
 }
 
 .profile-container {
@@ -86,7 +97,7 @@
   flex-direction: column;
 }
 .chats-container > h3 {
-  margin-left: 10px;
+  margin: 20px 0 20px 10px;
   color: #8abec9;
 }
 
@@ -95,6 +106,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
   padding: 0;
   margin: 0;
 }
@@ -148,27 +160,31 @@
   background-color: #faf8f9;
   width: 100%;
   height: 85%;
-  overflow-y: auto; /* Додає можливість скролу */
+  overflow-y: auto;
   display: flex;
-  flex-direction: column-reverse; /* Відображає повідомлення знизу */
+  flex-direction: column-reverse;
 
-  /* Приховуємо стандартну смугу прокрутки */
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: rgba(0, 0, 0, 0.5) transparent; /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.5) transparent;
 }
 
-/* Властивості для браузерів на базі WebKit (Chrome, Safari) */
-.chat::-webkit-scrollbar {
-  width: 6px; /* Вузька ширина */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-.chat::-webkit-scrollbar-track {
-  background: transparent; /* Прозорий фон */
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.chat::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.5); /* Напівпрозорий повзунок */
-  border-radius: 3px; /* Закруглені краї */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+}
+
+.no-messages {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 500;
 }
 
 .chats-item {
@@ -239,6 +255,17 @@
   width: 100%;
   height: 15%;
   background-color: #f5f5f5;
+  position: relative;
+}
+
+.chat-input-icon {
+  position: absolute;
+  background: none;
+  border: none;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .chat-input-container > input {

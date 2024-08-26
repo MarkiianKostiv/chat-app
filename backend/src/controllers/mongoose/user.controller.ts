@@ -6,6 +6,6 @@ const controller = Router();
 
 controller
   .get("/", protectRoute, getUsers)
-  .get("/:Identifier", protectRoute, getUserByIdentifier);
+  .get("/query", protectRoute, getUserByIdentifier);
 
 export default controller;

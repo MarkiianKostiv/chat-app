@@ -1,8 +1,9 @@
 import { createContext, useContext, useState } from "react";
+import { IUser } from "../interfaces/iuser";
 
 interface AuthContextType {
-  authUser: string | null;
-  setAuthUser: React.Dispatch<React.SetStateAction<string | null>>;
+  authUser: IUser | null;
+  setAuthUser: React.Dispatch<React.SetStateAction<IUser | null>>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -24,7 +25,7 @@ export const AuthContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [authUser, setAuthUser] = useState<string | null>(() => {
+  const [authUser, setAuthUser] = useState<IUser | null>(() => {
     const user = localStorage.getItem("chat-user");
     return user ? JSON.parse(user) : null;
   });

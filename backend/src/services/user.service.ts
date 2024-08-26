@@ -56,19 +56,57 @@ export const getUserByIdentifier = async (
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { identifier } = req.params; // identifier can be username or email or firsName or lastName
+    const identifier = req.query.identifier?.toString();
 
-    const users = await UserModel.find({
-      $or: [
-        { username: identifier },
-        { email: identifier },
-        { firstName: identifier },
-        { lastName: identifier },
-      ],
-      _id: { $ne: loggedInUserId },
-    }).select("-password");
+    let users;
+    if (identifier) {
+      users = await UserModel.find({
+        $or: [
+          { username: { $regex: identifier, $options: "i" } },
+          { email: { $regex: identifier, $options: "i" } },
+          { firstName: { $regex: identifier, $options: "i" } },
+          { lastName: { $regex: identifier, $options: "i" } },
+        ],
+        _id: { $ne: loggedInUserId },
+      }).select("-password");
+    } else {
+      users = await UserModel.find({
+        _id: { $ne: loggedInUserId },
+      }).select("-password");
+    }
 
-    res.status(200).json(users);
+    const chats = await ChatSchema.find({
+      participants: loggedInUserId,
+    }).populate({
+      path: "messages",
+      options: { sort: { createdAt: -1 }, limit: 1 },
+    });
+
+    // Create a map of existing chats for quick lookup
+    const chatMap = new Map();
+    chats.forEach((chat) => {
+      const otherParticipantId = chat.participants.find(
+        (id: any) => id.toString() !== loggedInUserId.toString()
+      );
+      if (otherParticipantId) {
+        chatMap.set(
+          otherParticipantId.toString(),
+          chat.messages[0] || { message: "" }
+        );
+      }
+    });
+
+    const usersWithLastMessages = await Promise.all(
+      users.map(async (user) => {
+        const lastMessage = chatMap.get(user._id.toString()) || { message: "" };
+        return {
+          user,
+          lastMessage: lastMessage.message,
+        };
+      })
+    );
+
+    res.status(200).json(usersWithLastMessages);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

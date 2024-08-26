@@ -16,7 +16,10 @@ const useGetChats = (): UseGetChatsResult => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const response = await fetch(`${apiConfig.url}/users`);
+        const response = await fetch(`${apiConfig.url}/users`, {
+          method: "GET",
+          credentials: "include",
+        });
 
         if (!response.ok) {
           throw new Error("Failed to fetch chats");

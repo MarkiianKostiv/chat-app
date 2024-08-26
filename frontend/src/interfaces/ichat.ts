@@ -1,4 +1,5 @@
 export interface IChat {
+  _id: string;
   user: {
     _id: string;
     username: string;

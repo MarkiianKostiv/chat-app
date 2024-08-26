@@ -1,26 +1,31 @@
 import { ProfileImg } from "./ProfileImg";
 
 interface ChatsItemProps {
-  profile_img: string;
+  profile_img?: string;
   username: string;
   lastMessage: string;
-  createAt: Date;
+  createdAt: string | Date;
+  onClick: () => void;
 }
 
 export const ChatsItem = ({
   profile_img,
   username,
   lastMessage,
-  createAt,
+  createdAt,
+  onClick,
 }: ChatsItemProps) => {
-  const formattedDate = new Date(createAt).toLocaleDateString("en-US", {
+  const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
   return (
-    <li className='chats-item'>
+    <li
+      className='chats-item'
+      onClick={onClick}
+    >
       <div className='chat-item-info'>
         <ProfileImg profile_img={profile_img} />
         <div>
