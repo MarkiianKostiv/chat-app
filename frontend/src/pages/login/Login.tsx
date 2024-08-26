@@ -1,22 +1,41 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "../../hooks/useForm";
+import { useLogin } from "../../hooks/useLogin";
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
-import { Link } from "react-router-dom";
+import { Loader } from "../../componnets/ui/Loader";
 
 export const Login = () => {
-  const { formState, handleInputChange, validateForm, error } = useForm({
-    emailOrUsername: "",
+  const {
+    formState,
+    handleInputChange,
+    validateForm,
+    error: formError,
+  } = useForm({
+    identifier: "",
     password: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { login, loading, error: loginError, response } = useLogin();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
-    console.log("Email or Username:", formState.emailOrUsername);
-    console.log("Password:", formState.password);
+    await login(formState);
+
+    if (response) {
+      navigate("/");
+    }
   };
+
+  useEffect(() => {
+    if (response) {
+      navigate("/");
+    }
+  }, [response, navigate]);
 
   return (
     <div className='login-container'>
@@ -29,9 +48,9 @@ export const Login = () => {
           Email or Username:
           <input
             type='text'
-            name='emailOrUsername'
+            name='identifier'
             placeholder='Type email or username'
-            value={formState.emailOrUsername}
+            value={formState.identifier}
             onChange={handleInputChange}
             required
           />
@@ -47,16 +66,23 @@ export const Login = () => {
             required
           />
         </label>
-        {error && <p className='error-message'>{error}</p>}
+        {(formError || loginError) && (
+          <p className='error-message'>{formError || loginError}</p>
+        )}
         <h3>
-          Do not have account yet? <Link to={"/sign-up"}>Sign in</Link>
+          Do not have an account yet? <Link to={"/sign-up"}>Sign up</Link>
         </h3>
         <button
           className='submit-btn'
           type='submit'
+          disabled={loading}
         >
-          Login
+          {loading ? <Loader /> : "Login"}
         </button>
+
+        {response && !loginError && (
+          <p className='success-message'>{response.message}</p>
+        )}
       </form>
     </div>
   );

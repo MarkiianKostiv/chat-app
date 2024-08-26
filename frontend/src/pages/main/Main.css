@@ -50,6 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 10px 0 15px 0;
 }
 .profile-container > a {
   background-color: #fff;
@@ -77,10 +78,11 @@
 .chats-container {
   background-color: #fff;
   width: 100%;
+  height: 70%;
   border-right: 1px solid #dcdcdc;
   display: flex;
   align-items: start;
-  justify-content: center;
+  justify-content: start;
   flex-direction: column;
 }
 .chats-container > h3 {
@@ -90,18 +92,30 @@
 
 .chats-container > ul {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   padding: 0;
   margin: 0;
 }
-.chats-container > ul > li {
-  width: 100%;
+
+.settings-btn-container {
   display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin: 0;
-  border-bottom: 1px solid #dcdcdc;
+  align-items: center;
+  justify-content: start;
+  width: 100%;
+  height: 10%;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+}
+
+.settings-btn {
+  margin-left: 10px;
+  background: none;
+  border: none;
 }
 
 .chat-container {
@@ -120,11 +134,118 @@
   align-items: center;
   justify-content: start;
   border-bottom: 1px solid #dcdcdc;
-  /* border-left: 1px solid #dcdcdc; */
+  padding: 10px 0 15px 0;
+}
+.chat-header > div {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
 }
 
 .chat {
   background-color: #faf8f9;
   width: 100%;
   height: 85%;
+  overflow-y: auto; /* Додає можливість скролу */
+  display: flex;
+  flex-direction: column-reverse; /* Відображає повідомлення знизу */
+
+  /* Приховуємо стандартну смугу прокрутки */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(0, 0, 0, 0.5) transparent; /* Firefox */
+}
+
+/* Властивості для браузерів на базі WebKit (Chrome, Safari) */
+.chat::-webkit-scrollbar {
+  width: 6px; /* Вузька ширина */
+}
+
+.chat::-webkit-scrollbar-track {
+  background: transparent; /* Прозорий фон */
+}
+
+.chat::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.5); /* Напівпрозорий повзунок */
+  border-radius: 3px; /* Закруглені краї */
+}
+
+.chats-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid #dcdcdc;
+  padding: 15px 0;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.chats-item:hover {
+  background-color: #f0f0f0;
+  border-bottom-color: #c0c0c0;
+}
+
+.chats-item:active {
+  background-color: #e0e0e0;
+  border-bottom-color: #a0a0a0;
+}
+
+.chat-item-info {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 15px;
+  margin-left: 5px;
+}
+
+.chat-item-info > div {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: center;
+}
+
+.chat-item-info > div > h3 {
+  font-weight: 400;
+  font-size: 18px;
+}
+.chat-item-info > div > p {
+  font-weight: 400;
+  font-size: 14px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-item-date {
+  margin-right: 5px;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.chat-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 15%;
+  background-color: #f5f5f5;
+}
+
+.chat-input-container > input {
+  width: 90%;
+  display: flex;
+  border-radius: 12px;
+  background-color: #fff;
+  color: #000;
+  padding: 10px;
 }

@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { CustomRequest } from "../interfaces/castomreqest";
 import UserModel from "../db/mongodb/schema/user.schema";
+import ChatSchema from "../db/mongodb/schema/chat.schema";
 
 export const getUsers = async (req: CustomRequest, res: Response) => {
   try {
@@ -10,11 +11,35 @@ export const getUsers = async (req: CustomRequest, res: Response) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const allUsers = await UserModel.find({
-      _id: { $ne: loggedInUserId },
-    }).select("-password");
+    const chats = await ChatSchema.find({
+      participants: loggedInUserId,
+    }).populate({
+      path: "messages",
+      options: { sort: { createdAt: -1 }, limit: 1 },
+    });
 
-    res.status(200).json(allUsers);
+    if (!chats.length) {
+      return res.status(200).json([]);
+    }
+
+    const usersWithLastMessages = await Promise.all(
+      chats.map(async (chat) => {
+        const lastMessage = chat.messages[0];
+        const otherParticipantId = chat.participants.find(
+          (id: any) => id.toString() !== loggedInUserId.toString()
+        );
+        const user = await UserModel.findById(otherParticipantId).select(
+          "-password"
+        );
+
+        return {
+          user,
+          lastMessage,
+        };
+      })
+    );
+
+    res.status(200).json(usersWithLastMessages);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

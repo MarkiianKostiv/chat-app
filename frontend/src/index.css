@@ -26,3 +26,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
+
+h3,
+p {
+  margin: 0;
+  padding: 0;
+}

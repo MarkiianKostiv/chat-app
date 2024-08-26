@@ -1,9 +1,17 @@
 import React from "react";
 import { useForm } from "../../hooks/useForm";
+import { useSignup } from "../../hooks/useSignup";
+import { Link, useNavigate } from "react-router-dom";
 import "./Signup.css";
-import { Link } from "react-router-dom";
+import { Loader } from "../../componnets/ui/Loader";
+
 export const SignUp = () => {
-  const { formState, handleInputChange, validateForm, error } = useForm({
+  const {
+    formState,
+    handleInputChange,
+    validateForm,
+    error: formError,
+  } = useForm({
     firstName: "",
     lastName: "",
     email: "",
@@ -12,17 +20,19 @@ export const SignUp = () => {
     confirmPassword: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { signup, loading, error: signupError, response } = useSignup();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
-    console.log("firstName:", formState.firstName);
-    console.log("lastName:", formState.lastName);
-    console.log("email:", formState.email);
-    console.log("username:", formState.username);
-    console.log("password:", formState.password);
-    console.log("confirmPassword:", formState.confirmPassword);
+    await signup(formState);
+
+    if (response && !signupError) {
+      navigate("/");
+    }
   };
 
   return (
@@ -104,17 +114,22 @@ export const SignUp = () => {
             </label>
           </div>
         </div>
-        {error && <p className='error-message'>{error}</p>}
+        {(formError || signupError) && (
+          <p className='error-message'>{formError || signupError}</p>
+        )}
 
         <h3>
-          Already have account? <Link to={"/login"}>Log in</Link>
+          Already have an account? <Link to={"/login"}>Log in</Link>
         </h3>
         <button
           className='submit-btn'
           type='submit'
+          disabled={loading}
         >
-          Sign up
+          {loading ? <Loader /> : "Sign up"}
         </button>
+
+        {response && <p className='success-message'>{response.message}</p>}
       </form>
     </div>
   );
