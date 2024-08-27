@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import ChatSchema from "../db/mongodb/schema/chat.schema";
 import MessageSchema from "../db/mongodb/schema/message.schema";
 import { CustomRequest } from "../interfaces/castomreqest";
+import { getReceiverSocketId, io } from "../socket/socket";
 
 export const sendMessage = async (req: CustomRequest, res: Response) => {
   try {
@@ -41,6 +42,17 @@ export const sendMessage = async (req: CustomRequest, res: Response) => {
       conversation.messages.push(newMessage._id);
 
       await Promise.all([newMessage.save(), conversation.save()]);
+
+      const receiverSocketId = getReceiverSocketId(receiverId);
+      const senderSocketId = getReceiverSocketId(senderId.toString());
+
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newMessage", newMessage);
+      }
+
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("newMessage", newMessage);
+      }
 
       res.status(200).json(newMessage);
     } else {

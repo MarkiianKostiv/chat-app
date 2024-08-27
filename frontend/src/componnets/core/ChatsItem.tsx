@@ -3,6 +3,7 @@ import { ProfileImg } from "./ProfileImg";
 interface ChatsItemProps {
   profile_img?: string;
   username: string;
+  id: string;
   lastMessage: string;
   createdAt: string | Date;
   onClick: () => void;
@@ -13,6 +14,7 @@ export const ChatsItem = ({
   username,
   lastMessage,
   createdAt,
+  id,
   onClick,
 }: ChatsItemProps) => {
   const formattedDate = new Date(createdAt).toLocaleDateString("en-US", {
@@ -27,7 +29,10 @@ export const ChatsItem = ({
       onClick={onClick}
     >
       <div className='chat-item-info'>
-        <ProfileImg profile_img={profile_img} />
+        <ProfileImg
+          profile_img={profile_img}
+          id={id}
+        />
         <div>
           <h3>{username}</h3>
           <p>{lastMessage}</p>

@@ -1,5 +1,5 @@
 import express from "express";
-const app = express();
+import { app } from "./socket/socket";
 import dotenv from "dotenv";
 import appSetup from "./startup/init";
 import routerSetup from "./startup/router";

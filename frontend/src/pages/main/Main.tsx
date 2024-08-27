@@ -1,5 +1,5 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import "./Main.css";
 import { NoChatSelected } from "../../componnets/common/NoChatSelected";
 import { ProfileImg } from "../../componnets/core/ProfileImg";
@@ -12,19 +12,51 @@ import { ChatsLoader } from "../../componnets/ui/ChatsLoader";
 import useFindUser from "../../hooks/useFindUser";
 import useGetChats from "../../hooks/useGetChats";
 import useGetMessages from "../../hooks/useGetMessages";
+import useSendMessage from "../../hooks/useSendMessage";
+import { useSocketContext } from "../../context/SocketContext";
 
 export const Main = () => {
   const { authUser } = useAuthContext();
+  const { sendMessage } = useSendMessage();
   const [open, setOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const { socket } = useSocketContext();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null); // Реалізація рефа
 
   const { chats, loading: chatsLoading, error: chatsError } = useGetChats();
   const {
-    messages,
+    messages: initialMessages,
     loading: messagesLoading,
     error: messagesError,
   } = useGetMessages(selectedChat?.user?._id);
+
+  const [messages, setMessages] = useState<any[]>(initialMessages || []);
+
+  useEffect(() => {
+    setMessages(initialMessages || []);
+  }, [initialMessages]);
+
+  useEffect(() => {
+    const handleNewMessage = (newMessage: any) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    };
+
+    socket?.on("newMessage", handleNewMessage);
+
+    return () => {
+      socket?.off("newMessage", handleNewMessage);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    // Функція для прокручування донизу
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+    scrollToBottom();
+  }, [messages]); // Прокручування донизу щоразу, коли список повідомлень оновлюється
 
   const {
     users,
@@ -42,10 +74,25 @@ export const Main = () => {
 
   const handleChatSelect = (chat: any) => {
     setSelectedChat(chat);
+    setMessages([]);
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
+  };
+
+  const handleSendMessage = () => {
+    if (newMessage.trim() && selectedChat) {
+      sendMessage({
+        receiverId: selectedChat.user._id,
+        message: newMessage,
+      });
+      setNewMessage("");
+    }
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(event.target.value);
   };
 
   const displayedChats = searchQuery && users.length > 0 ? users : chats;
@@ -113,6 +160,7 @@ export const Main = () => {
               item.user ? (
                 <ChatsItem
                   key={item.user._id}
+                  id={item.user._id}
                   username={item.user.username}
                   lastMessage={item.lastMessage?.message}
                   createdAt={item.lastMessage?.createdAt}
@@ -157,9 +205,13 @@ export const Main = () => {
                   type={msg.senderId === authUser?._id ? "sender" : "receiver"}
                 />
               ))}
+              <div ref={messagesEndRef} /> {/* Контейнер для прокручування */}
             </div>
             <div className='chat-input-container'>
-              <button className='chat-input-icon'>
+              <button
+                className='chat-input-icon'
+                onClick={handleSendMessage}
+              >
                 <Icon.Message
                   defaultColor='#7C7C7C'
                   hoverColor='#7C7C7A'
@@ -170,6 +222,11 @@ export const Main = () => {
               <input
                 type='text'
                 placeholder='Type your message'
+                value={newMessage}
+                onChange={handleInputChange}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") handleSendMessage();
+                }}
               />
             </div>
           </>

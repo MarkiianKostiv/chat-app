@@ -2,6 +2,7 @@ import { Express, Request, Response } from "express";
 import UserController from "../controllers/mongoose/user.controller";
 import authController from "../controllers/mongoose/auth.controller";
 import messagesController from "../controllers/mongoose/messages.controller";
+import chatController from "../controllers/mongoose/chat.controllers";
 
 const routerSetup = (app: Express) =>
   app
@@ -11,6 +12,7 @@ const routerSetup = (app: Express) =>
     })
     .use("/users", UserController)
     .use("/auth", authController)
-    .use("/messages", messagesController);
+    .use("/messages", messagesController)
+    .use("/chat", chatController);
 
 export default routerSetup;

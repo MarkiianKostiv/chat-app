@@ -1,17 +1,10 @@
 import { useEffect, useState } from "react";
 import { apiConfig } from "../api_config/config";
-import { IChat } from "../interfaces/ichat";
 
-interface UseGetChatsResult {
-  chats: IChat[];
-  loading: boolean;
-  error: string | null;
-}
-
-const useGetChats = (): UseGetChatsResult => {
-  const [chats, setChats] = useState<IChat[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+const useGetChats = () => {
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -27,8 +20,9 @@ const useGetChats = (): UseGetChatsResult => {
 
         const data = await response.json();
         setChats(data);
-      } catch (err: any) {
-        setError(err.message || "An unexpected error occurred");
+      } catch (error: any) {
+        setError(error);
+        console.error("Error fetching chats:", error);
       } finally {
         setLoading(false);
       }
