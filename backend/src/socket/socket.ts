@@ -11,7 +11,11 @@ const deployHost = process.env.DEPLOY_HOST;
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [`${localhost}`, `${deployHost}`],
+    origin: [
+      `${localhost}`,
+      `${deployHost}`,
+      "https://chat-20k1y102d-markians-projects.vercel.app",
+    ],
     methods: ["GET", "POST"],
   },
 });
