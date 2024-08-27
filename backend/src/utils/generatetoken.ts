@@ -15,7 +15,8 @@ const generateTokenAndSetCookie = (userId: string, res: Response) => {
   res.cookie("token", token, {
     maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "none",
+    secure: false,
   });
 };
 
