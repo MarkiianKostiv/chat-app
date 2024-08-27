@@ -14,6 +14,8 @@ const corsOptions = {
     "https://chat-app-six-beta-83.vercel.app",
   ],
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 const securitySetup = (app: Express, express: any) =>
