@@ -1,9 +1,18 @@
 import cors from "cors";
 import { Express } from "express";
 import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+dotenv.config();
+
+const localhost = process.env.LOCAL_HOST;
+const deployHost = process.env.DEPLOY_HOST;
 
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: [
+    `${localhost}`,
+    `${deployHost}`,
+    "https://chat-20k1y102d-markians-projects.vercel.app",
+  ],
   credentials: true,
 };
 

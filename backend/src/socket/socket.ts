@@ -16,6 +16,7 @@ const io = new Server(server, {
       `${deployHost}`,
       "https://chat-20k1y102d-markians-projects.vercel.app",
     ],
+    credentials: true,
     methods: ["GET", "POST"],
   },
 });
