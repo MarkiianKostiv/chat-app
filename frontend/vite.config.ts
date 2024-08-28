@@ -9,6 +9,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "https://chat-app-9qwi.onrender.com",
+        // target: "http://localhost:3000",
         changeOrigin: true,
       },
     },

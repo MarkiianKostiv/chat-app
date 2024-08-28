@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "../../hooks/useForm";
 import { useSignup } from "../../hooks/useSignup";
 import { Link, useNavigate } from "react-router-dom";
@@ -23,16 +23,18 @@ export const SignUp = () => {
   const { signup, loading, error: signupError, response } = useSignup();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (response && !signupError) {
+      navigate("/");
+    }
+  }, [response, signupError, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
     await signup(formState);
-
-    if (response && !signupError) {
-      navigate("/");
-    }
   };
 
   return (

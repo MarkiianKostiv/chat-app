@@ -3,7 +3,7 @@ import { CustomRequest } from "../interfaces/castomreqest";
 import chatSchema from "../db/mongodb/schema/chat.schema";
 
 export const deleteChat = async (req: CustomRequest, res: Response) => {
-  const { id: receiverId } = req.params;
+  const { receiverId } = req.params;
   const senderId = req.user?._id;
 
   if (!senderId) {

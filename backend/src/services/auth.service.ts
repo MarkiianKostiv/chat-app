@@ -1,41 +1,73 @@
 import { Request, Response } from "express";
 import UserModel from "../db/mongodb/schema/user.schema";
+import ChatSchema from "../db/mongodb/schema/chat.schema";
+import MessageSchema from "../db/mongodb/schema/message.schema";
 import bcrypt from "bcrypt";
 import generateTokenAndSetCookie from "../utils/generatetoken";
+import getRandomQuote from "../utils/getRandomQuote";
 
 export const signup = async (req: Request, res: Response) => {
   try {
     const { username, firstName, lastName, email, password, confirmPassword } =
       req.body;
+
     if (password !== confirmPassword) {
-      res.status(400).json({ error: "Passwords fo not match" });
+      return res.status(400).json({ error: "Passwords do not match" });
     }
 
     const user = await UserModel.findOne({ username });
 
     if (user) {
-      res.status(400).json({ error: `Username: ${username} already taken` });
+      return res
+        .status(400)
+        .json({ error: `Username: ${username} already taken` });
     }
 
     const userEmail = await UserModel.findOne({ email });
 
     if (userEmail) {
-      res.status(400).json({ error: `Email: ${email} already exist` });
+      return res.status(400).json({ error: `Email: ${email} already exists` });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const newUser = new UserModel();
-    newUser.username = username;
-    newUser.firstName = firstName;
-    newUser.lastName = lastName;
-    newUser.email = email;
-    newUser.password = hashedPassword;
+    const newUser = new UserModel({
+      username,
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    // IDs of the bots you created earlier
+    const botIds = [
+      "66cee93b2b5d6998a1de9cde",
+      "66cee93b2b5d6998a1de9ce1",
+      "66cee93b2b5d6998a1de9ce4",
+    ];
+
+    // Automatically create chats with the bots
+    for (const botId of botIds) {
+      let conversation = await ChatSchema.create({
+        participants: [newUser._id, botId],
+      });
+
+      // Get a random quote and send it as the first message in each chat
+      const quote = await getRandomQuote();
+      const initialMessage = new MessageSchema({
+        senderId: botId,
+        receiverId: newUser._id,
+        message: quote,
+      });
+
+      conversation.messages.push(initialMessage._id);
+      await Promise.all([initialMessage.save(), conversation.save()]);
+    }
+
     if (newUser) {
       generateTokenAndSetCookie(newUser._id, res);
-
-      await newUser.save();
-
       res.status(201).json({
         _id: newUser._id,
         username: newUser.username,
@@ -43,8 +75,6 @@ export const signup = async (req: Request, res: Response) => {
         lastName: newUser.lastName,
         email: newUser.email,
       });
-    } else {
-      res.status(400).json({ error: "Invalid user Data" });
     }
   } catch (err: any) {
     res.status(500).json({ error: err.message });

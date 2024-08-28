@@ -2,8 +2,10 @@ import { Response } from "express";
 import { Types } from "mongoose";
 import ChatSchema from "../db/mongodb/schema/chat.schema";
 import MessageSchema from "../db/mongodb/schema/message.schema";
+import UserModel from "../db/mongodb/schema/user.schema";
 import { CustomRequest } from "../interfaces/castomreqest";
 import { getReceiverSocketId, io } from "../socket/socket";
+import getRandomQuote from "../utils/getRandomQuote";
 
 export const sendMessage = async (req: CustomRequest, res: Response) => {
   try {
@@ -52,6 +54,25 @@ export const sendMessage = async (req: CustomRequest, res: Response) => {
 
       if (senderSocketId) {
         io.to(senderSocketId).emit("newMessage", newMessage);
+      }
+
+      // Check if the receiver is a bot
+      const receiverUser = await UserModel.findById(receiverObjectId);
+      if (receiverUser && receiverUser.username.startsWith("quoteBot")) {
+        // Get a random quote and send it back as a response
+        const botReplyMessage = new MessageSchema({
+          senderId: receiverObjectId,
+          receiverId: senderId,
+          message: await getRandomQuote(),
+        });
+
+        conversation.messages.push(botReplyMessage._id);
+
+        await Promise.all([botReplyMessage.save(), conversation.save()]);
+
+        if (senderSocketId) {
+          io.to(senderSocketId).emit("newMessage", botReplyMessage);
+        }
       }
 
       res.status(200).json(newMessage);

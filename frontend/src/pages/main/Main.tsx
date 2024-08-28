@@ -14,6 +14,8 @@ import useGetChats from "../../hooks/useGetChats";
 import useGetMessages from "../../hooks/useGetMessages";
 import useSendMessage from "../../hooks/useSendMessage";
 import { useSocketContext } from "../../context/SocketContext";
+import useDeleteChat from "../../hooks/useDeleteChat";
+import { DeleteLoader } from "../../componnets/ui/DeleteLoader";
 
 export const Main = () => {
   const { authUser } = useAuthContext();
@@ -23,14 +25,24 @@ export const Main = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const { socket } = useSocketContext();
-  const messagesEndRef = useRef<HTMLDivElement | null>(null); // Реалізація рефа
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const { chats, loading: chatsLoading, error: chatsError } = useGetChats();
+  const {
+    chats,
+    loading: chatsLoading,
+    error: chatsError,
+    fetchChats,
+  } = useGetChats();
   const {
     messages: initialMessages,
     loading: messagesLoading,
     error: messagesError,
   } = useGetMessages(selectedChat?.user?._id);
+  const {
+    loading: deleteChatLoading,
+    error: errorDeleteChat,
+    deleteChat,
+  } = useDeleteChat();
 
   const [messages, setMessages] = useState<any[]>(initialMessages || []);
 
@@ -51,12 +63,11 @@ export const Main = () => {
   }, [socket]);
 
   useEffect(() => {
-    // Функція для прокручування донизу
     const scrollToBottom = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
     scrollToBottom();
-  }, [messages]); // Прокручування донизу щоразу, коли список повідомлень оновлюється
+  }, [messages]);
 
   const {
     users,
@@ -95,6 +106,11 @@ export const Main = () => {
     setNewMessage(event.target.value);
   };
 
+  const handleDeleteChat = async (receiverId: string) => {
+    await deleteChat(receiverId);
+    setSelectedChat(null);
+    fetchChats();
+  };
   const displayedChats = searchQuery && users.length > 0 ? users : chats;
 
   return (
@@ -183,10 +199,28 @@ export const Main = () => {
           <>
             <div className='chat-header'>
               <div>
-                <ProfileImg />
+                <ProfileImg id={selectedChat.user._id} />
                 <h3>
                   {selectedChat.user.firstName} {selectedChat.user.lastName}
                 </h3>
+              </div>
+              {errorDeleteChat && <div>Error while deleting a chat</div>}
+              <div>
+                <button
+                  className='delete-chat-btn'
+                  onClick={() => {
+                    handleDeleteChat(selectedChat.user._id);
+                  }}
+                >
+                  {deleteChatLoading ? (
+                    <DeleteLoader />
+                  ) : (
+                    <Icon.Delete
+                      defaultColor='#f5f5f5'
+                      hoverColor='#f5f5f5'
+                    />
+                  )}
+                </button>
               </div>
             </div>
             <div className='chat'>
@@ -205,7 +239,7 @@ export const Main = () => {
                   type={msg.senderId === authUser?._id ? "sender" : "receiver"}
                 />
               ))}
-              <div ref={messagesEndRef} /> {/* Контейнер для прокручування */}
+              <div ref={messagesEndRef} />
             </div>
             <div className='chat-input-container'>
               <button
