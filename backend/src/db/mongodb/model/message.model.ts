@@ -5,4 +5,6 @@ export interface IMessage extends Document {
   senderId: ObjectId | string;
   receiverId: ObjectId | string;
   message: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

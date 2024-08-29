@@ -1,11 +1,9 @@
+import { IUser } from "./iuser";
+
 export interface IChat {
   _id: string;
-  user: {
-    _id: string;
-    username: string;
-    profile_img: string;
-  };
-  lastMessage: {
+  user: IUser;
+  lastMessage?: {
     _id: string;
     senderId: string;
     receiverId: string;

@@ -46,6 +46,12 @@
   height: 100%;
 }
 
+.chat-loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .search-input {
   width: 100%;
   display: flex;

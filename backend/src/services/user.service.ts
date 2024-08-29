@@ -2,6 +2,7 @@ import { Response } from "express";
 import { CustomRequest } from "../interfaces/castomreqest";
 import UserModel from "../db/mongodb/schema/user.schema";
 import ChatSchema from "../db/mongodb/schema/chat.schema";
+import MessageSchema from "../db/mongodb/schema/message.schema";
 
 export const getUsers = async (req: CustomRequest, res: Response) => {
   try {
@@ -13,9 +14,6 @@ export const getUsers = async (req: CustomRequest, res: Response) => {
 
     const chats = await ChatSchema.find({
       participants: loggedInUserId,
-    }).populate({
-      path: "messages",
-      options: { sort: { createdAt: -1 }, limit: 1 },
     });
 
     if (!chats.length) {
@@ -24,7 +22,11 @@ export const getUsers = async (req: CustomRequest, res: Response) => {
 
     const usersWithLastMessages = await Promise.all(
       chats.map(async (chat) => {
-        const lastMessage = chat.messages[0];
+        const lastMessageId = chat.messages[chat.messages.length - 1];
+        const lastMessage = lastMessageId
+          ? await MessageSchema.findById(lastMessageId)
+          : null;
+
         const otherParticipantId = chat.participants.find(
           (id: any) => id.toString() !== loggedInUserId.toString()
         );
@@ -39,7 +41,18 @@ export const getUsers = async (req: CustomRequest, res: Response) => {
       })
     );
 
-    res.status(200).json(usersWithLastMessages);
+    const usersWithChats = usersWithLastMessages.sort((a, b) => {
+      if (!a.lastMessage && !b.lastMessage) return 0;
+      if (!a.lastMessage) return 1;
+      if (!b.lastMessage) return -1;
+
+      const dateA = new Date(a.lastMessage.createdAt).getTime();
+      const dateB = new Date(b.lastMessage.createdAt).getTime();
+
+      return dateB - dateA;
+    });
+
+    res.status(200).json(usersWithChats);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

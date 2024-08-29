@@ -15,11 +15,15 @@ import useGetMessages from "../../hooks/useGetMessages";
 import useSendMessage from "../../hooks/useSendMessage";
 import { useSocketContext } from "../../context/SocketContext";
 import useDeleteChat from "../../hooks/useDeleteChat";
-import { DeleteLoader } from "../../componnets/ui/DeleteLoader";
+import { IChatMessage } from "../../interfaces/ichatmessage";
+import { IChat } from "../../interfaces/ichat";
+import { DeleteChatBtn } from "../../componnets/core/DeleteChatBtn";
+import { SendMessageLoader } from "../../componnets/ui/SendMessageLoader";
+import notificationSound from "../../assets/notification.mp3";
 
 export const Main = () => {
   const { authUser } = useAuthContext();
-  const { sendMessage } = useSendMessage();
+  const { sendMessage, loading: sendMessageLoading } = useSendMessage();
   const [open, setOpen] = useState(false);
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,32 +31,34 @@ export const Main = () => {
   const { socket } = useSocketContext();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const {
-    chats,
-    loading: chatsLoading,
-    error: chatsError,
-    fetchChats,
-  } = useGetChats();
+  const { chats, loading: chatsLoading, error: chatsError } = useGetChats();
+
   const {
     messages: initialMessages,
     loading: messagesLoading,
     error: messagesError,
   } = useGetMessages(selectedChat?.user?._id);
-  const {
-    loading: deleteChatLoading,
-    error: errorDeleteChat,
-    deleteChat,
-  } = useDeleteChat();
 
-  const [messages, setMessages] = useState<any[]>(initialMessages || []);
+  const { error: errorDeleteChat } = useDeleteChat();
+
+  const [messages, setMessages] = useState<IChatMessage[]>(
+    initialMessages || []
+  );
 
   useEffect(() => {
     setMessages(initialMessages || []);
   }, [initialMessages]);
 
   useEffect(() => {
-    const handleNewMessage = (newMessage: any) => {
+    const handleNewMessage = (newMessage: IChatMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+      const isCurrentUser = newMessage.senderId === authUser?._id;
+
+      if (!isCurrentUser) {
+        const sound = new Audio(notificationSound);
+        sound.play();
+      }
     };
 
     socket?.on("newMessage", handleNewMessage);
@@ -76,14 +82,10 @@ export const Main = () => {
   } = useFindUser(searchQuery);
 
   const openLogoutModal = () => {
-    setOpen(true);
+    open === false ? setOpen(true) : setOpen(false);
   };
 
-  const closeLogoutModal = () => {
-    setOpen(false);
-  };
-
-  const handleChatSelect = (chat: any) => {
+  const handleChatSelect = (chat: IChat) => {
     setSelectedChat(chat);
     setMessages([]);
   };
@@ -106,18 +108,13 @@ export const Main = () => {
     setNewMessage(event.target.value);
   };
 
-  const handleDeleteChat = async (receiverId: string) => {
-    await deleteChat(receiverId);
-    setSelectedChat(null);
-    fetchChats();
-  };
   const displayedChats = searchQuery && users.length > 0 ? users : chats;
 
   return (
     <div className='main-page-container'>
       <LogoutForm
         open={open}
-        onClose={closeLogoutModal}
+        onClose={openLogoutModal}
       />
       <aside className='users-container'>
         <div className='chat-controls'>
@@ -161,7 +158,7 @@ export const Main = () => {
           <ul>
             {searchQuery && usersLoading && <li>Loading users...</li>}
             {!searchQuery && chatsLoading && (
-              <li>
+              <li className='chat-loader-container'>
                 <ChatsLoader />
               </li>
             )}
@@ -189,9 +186,12 @@ export const Main = () => {
           </ul>
         </div>
         <div className='settings-btn-container'>
-          <button className='settings-btn'>
+          <Link
+            to={"/settings"}
+            className='settings-btn'
+          >
             <Icon.Settings />
-          </button>
+          </Link>
         </div>
       </aside>
       <div className='chat-container'>
@@ -205,23 +205,10 @@ export const Main = () => {
                 </h3>
               </div>
               {errorDeleteChat && <div>Error while deleting a chat</div>}
-              <div>
-                <button
-                  className='delete-chat-btn'
-                  onClick={() => {
-                    handleDeleteChat(selectedChat.user._id);
-                  }}
-                >
-                  {deleteChatLoading ? (
-                    <DeleteLoader />
-                  ) : (
-                    <Icon.Delete
-                      defaultColor='#f5f5f5'
-                      hoverColor='#f5f5f5'
-                    />
-                  )}
-                </button>
-              </div>
+              <DeleteChatBtn
+                selectedChat={selectedChat}
+                setSelectedChat={setSelectedChat}
+              />
             </div>
             <div className='chat'>
               {messagesLoading && <p>Loading messages...</p>}
@@ -232,6 +219,7 @@ export const Main = () => {
               {messages.map((msg) => (
                 <Message
                   key={msg._id}
+                  receiverId={selectedChat.user._id}
                   message_data={{
                     text: msg.message,
                     date: new Date(msg.createdAt).toLocaleString(),
@@ -246,12 +234,16 @@ export const Main = () => {
                 className='chat-input-icon'
                 onClick={handleSendMessage}
               >
-                <Icon.Message
-                  defaultColor='#7C7C7C'
-                  hoverColor='#7C7C7A'
-                  height='25px'
-                  width='25px'
-                />
+                {sendMessageLoading ? (
+                  <SendMessageLoader />
+                ) : (
+                  <Icon.Message
+                    defaultColor='#7C7C7C'
+                    hoverColor='#7C7C7A'
+                    height='25px'
+                    width='25px'
+                  />
+                )}
               </button>
               <input
                 type='text'

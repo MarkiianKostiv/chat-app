@@ -4,9 +4,10 @@ import { ProfileImg } from "./ProfileImg";
 interface MessageProps {
   message_data: IMessage;
   type: "sender" | "receiver";
+  receiverId: string;
 }
 
-export const Message = ({ message_data, type }: MessageProps) => {
+export const Message = ({ message_data, type, receiverId }: MessageProps) => {
   const { text, date } = message_data;
 
   return (
@@ -22,7 +23,7 @@ export const Message = ({ message_data, type }: MessageProps) => {
           type === "sender" ? "sender-class" : "receiver-class"
         }`}
       >
-        {type === "receiver" && <ProfileImg />}
+        {type === "receiver" && <ProfileImg id={receiverId} />}
         <div>
           <p>{text}</p>
           <span>{date}</span>
