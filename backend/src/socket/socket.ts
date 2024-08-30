@@ -17,7 +17,7 @@ const io = new Server(server, {
       "https://chat-app-six-beta-83.vercel.app",
     ],
     credentials: true,
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PATCH"],
   },
 });
 

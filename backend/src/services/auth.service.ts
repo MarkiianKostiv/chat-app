@@ -37,6 +37,9 @@ export const signup = async (req: Request, res: Response) => {
       lastName,
       email,
       password: hashedPassword,
+      settings: {
+        sendMessageToRandomChat: false,
+      },
     });
 
     await newUser.save();
@@ -74,6 +77,7 @@ export const signup = async (req: Request, res: Response) => {
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
+        settings: newUser.settings,
       });
     }
   } catch (err: any) {
@@ -109,6 +113,7 @@ export const login = async (req: Request, res: Response) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        settings: user.settings,
       });
     }
   } catch (err: any) {

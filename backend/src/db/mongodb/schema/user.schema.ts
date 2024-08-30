@@ -29,6 +29,13 @@ const schema = new Schema<IUser>(
       select: false,
       minlength: 6,
     },
+    settings: {
+      sendMessageToRandomChat: {
+        type: Boolean,
+        required: true,
+        default: false,
+      },
+    },
   },
   {
     timestamps: true,

@@ -1,9 +1,20 @@
+import { useAuthContext } from "../../context/AuthContext";
+import { useUpdateSettings } from "../../hooks/useUpdateSettings";
+import { BlackLoader } from "./BlackLoader";
 import "./Ui.css";
+
 export const Switch = () => {
+  const { authUser } = useAuthContext();
+  const { loading } = useUpdateSettings();
   return (
     <label className='switch'>
-      <input type='checkbox' />
+      <input
+        type='checkbox'
+        defaultChecked={authUser?.settings.sendMessageToRandomChat}
+        disabled={loading === "pending"}
+      />
       <span className='slider'>
+        {loading === "pending" && <BlackLoader />}
         <svg
           className='slider-icon'
           viewBox='0 0 32 32'

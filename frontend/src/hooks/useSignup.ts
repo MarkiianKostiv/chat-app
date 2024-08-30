@@ -36,6 +36,7 @@ export const useSignup = () => {
       }
 
       localStorage.setItem("chat-user", JSON.stringify(data));
+      console.log(data);
 
       setAuthUser(data);
 
