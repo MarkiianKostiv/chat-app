@@ -3,6 +3,7 @@ import { Switch } from "../../componnets/ui/Switch";
 import "./Settings.css";
 import { useAuthContext } from "../../context/AuthContext";
 import { useUpdateSettings } from "../../hooks/useUpdateSettings";
+
 export const Settings = () => {
   const { authUser } = useAuthContext();
   const { changeSettings, error, response } = useUpdateSettings();
@@ -28,6 +29,9 @@ export const Settings = () => {
             : "Enable"}{" "}
           send random message to random chat?
         </p>
+        {authUser?.settings.sendMessageToRandomChat === true && (
+          <p>Random message has been sent to one of your chats after 1 hour.</p>
+        )}
         {error && <p>{error}</p>}
         {response && <p>{response.message}</p>}
         <button

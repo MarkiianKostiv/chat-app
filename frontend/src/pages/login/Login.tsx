@@ -4,6 +4,10 @@ import { useLogin } from "../../hooks/useLogin";
 import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 import { Loader } from "../../componnets/ui/Loader";
+import { jwtDecode } from "jwt-decode";
+import { useGoogleLogin } from "../../hooks/useGoogleLogin";
+import { GoogleLogin } from "@react-oauth/google";
+import { ProgressLoader } from "../../componnets/ui/ProgrresLoader";
 
 export const Login = () => {
   const {
@@ -17,6 +21,12 @@ export const Login = () => {
   });
 
   const { login, loading, error: loginError, response } = useLogin();
+  const {
+    googleLogin,
+    loading: googleLoading,
+    response: googleResponse,
+    error: googleError,
+  } = useGoogleLogin();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +45,26 @@ export const Login = () => {
     if (response) {
       navigate("/");
     }
-  }, [response, navigate]);
+    if (googleResponse) {
+      navigate("/");
+    }
+  }, [response, googleResponse, navigate]);
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    const token = credentialResponse.credential;
+    const user: any = jwtDecode(token);
+
+    const googleUserData = {
+      email: user.email,
+      email_verified: user.email_verified,
+    };
+
+    await googleLogin(googleUserData);
+  };
+
+  const handleGoogleError = () => {
+    console.log("Login Failed");
+  };
 
   return (
     <div className='login-container'>
@@ -75,12 +104,21 @@ export const Login = () => {
         <button
           className='submit-btn'
           type='submit'
-          disabled={loading}
+          disabled={loading || googleLoading}
         >
           {loading ? <Loader /> : "Login"}
         </button>
 
-        {response && !loginError && (
+        <h3>Or login with Google</h3>
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+        />
+        {googleLoading && <ProgressLoader />}
+
+        {googleError && <p className='error-message'>{googleError}</p>}
+
+        {response && !loginError && !googleError && (
           <p className='success-message'>{response.message}</p>
         )}
       </form>

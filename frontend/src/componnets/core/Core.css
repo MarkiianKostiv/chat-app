@@ -192,6 +192,29 @@
   gap: 10px;
 }
 
+.new-msg-toast {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+.new-msg-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 10px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 18px;
+}
+
 .display-none {
   display: none;
 }

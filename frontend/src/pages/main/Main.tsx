@@ -20,6 +20,7 @@ import { IChat } from "../../interfaces/ichat";
 import { DeleteChatBtn } from "../../componnets/core/DeleteChatBtn";
 import { SendMessageLoader } from "../../componnets/ui/SendMessageLoader";
 import notificationSound from "../../assets/notification.mp3";
+import { NewMsgToast } from "../../componnets/core/NewMsgToast";
 
 export const Main = () => {
   const { authUser } = useAuthContext();
@@ -28,6 +29,7 @@ export const Main = () => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState("");
+  const [msgModal, setMsgModal] = useState<boolean>(false);
   const { socket } = useSocketContext();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,13 +53,23 @@ export const Main = () => {
 
   useEffect(() => {
     const handleNewMessage = (newMessage: IChatMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-
       const isCurrentUser = newMessage.senderId === authUser?._id;
+      const isSelectedChat =
+        selectedChat &&
+        (newMessage.senderId === selectedChat.user._id ||
+          newMessage.receiverId === selectedChat.user._id);
 
-      if (!isCurrentUser) {
+      if (isCurrentUser || isSelectedChat) {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+
+      if (!isCurrentUser && (!selectedChat || !isSelectedChat)) {
         const sound = new Audio(notificationSound);
         sound.play();
+        setMsgModal(true);
+        setTimeout(() => {
+          setMsgModal(false);
+        }, 2000);
       }
     };
 
@@ -66,7 +78,7 @@ export const Main = () => {
     return () => {
       socket?.off("newMessage", handleNewMessage);
     };
-  }, [socket]);
+  }, [socket, selectedChat]);
 
   useEffect(() => {
     const scrollToBottom = () => {
@@ -116,6 +128,8 @@ export const Main = () => {
         open={open}
         onClose={openLogoutModal}
       />
+      <NewMsgToast isOpened={msgModal} />
+
       <aside className='users-container'>
         <div className='chat-controls'>
           <div className='profile-container'>
