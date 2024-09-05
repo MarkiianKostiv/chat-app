@@ -47,6 +47,73 @@ export const Main = () => {
     initialMessages || []
   );
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "f") {
+        e.preventDefault();
+        setIsSearchModalOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!searchTerm.trim()) return;
+
+    const filteredMessages = messages.map((msg) => ({
+      ...msg,
+      isSelected: msg.message.toLowerCase().includes(searchTerm.toLowerCase()),
+    }));
+
+    setMessages(filteredMessages);
+
+    const matchedCount = filteredMessages.filter(
+      (msg) => msg.isSelected
+    ).length;
+    setSelectedIndex(matchedCount > 0 ? 1 : 0);
+  }, [searchTerm]);
+
+  const handleNextMatch = () => {
+    const matchedMessages = messages.filter((msg) => msg.isSelected);
+    setSelectedIndex((prevIndex) =>
+      prevIndex < matchedMessages.length ? prevIndex + 1 : 1
+    );
+    scrollToSelectedMessage(matchedMessages[selectedIndex - 1]?._id);
+  };
+
+  const handlePreviousMatch = () => {
+    const matchedMessages = messages.filter((msg) => msg.isSelected);
+    setSelectedIndex((prevIndex) =>
+      prevIndex > 1 ? prevIndex - 1 : matchedMessages.length
+    );
+    scrollToSelectedMessage(matchedMessages[selectedIndex - 1]?._id);
+  };
+
+  const scrollToSelectedMessage = (messageId: string | undefined) => {
+    const messageIndex = messages.findIndex((msg) => msg._id === messageId);
+    if (messageRefs.current[messageIndex]) {
+      messageRefs.current[messageIndex]?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleCloseSearchModal = () => {
+    setIsSearchModalOpen(false);
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) => ({
+        ...msg,
+        isSelected: false,
+      }))
+    );
+  };
+
   useEffect(() => {
     setMessages(initialMessages || []);
   }, [initialMessages]);
@@ -223,6 +290,46 @@ export const Main = () => {
                 selectedChat={selectedChat}
                 setSelectedChat={setSelectedChat}
               />
+              {isSearchModalOpen && (
+                <section className='msg-search-container'>
+                  <div>
+                    <button
+                      className='msg-search-close-btn'
+                      onClick={handleCloseSearchModal}
+                    >
+                      X
+                    </button>
+                  </div>
+                  <div className='msg-input-container'>
+                    <input
+                      type='text'
+                      placeholder='Find message'
+                      className='msg-find-input'
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div className='span'>
+                      {selectedIndex}/
+                      {messages.filter((msg) => msg.isSelected).length}
+                    </div>
+                  </div>
+
+                  <div>
+                    <button
+                      className='to-next-msg'
+                      onClick={handlePreviousMatch}
+                    >
+                      {"<"}
+                    </button>
+                    <button
+                      className='to-previous-msg'
+                      onClick={handleNextMatch}
+                    >
+                      {">"}
+                    </button>
+                  </div>
+                </section>
+              )}
             </div>
             <div className='chat'>
               {messagesLoading && <p>Loading messages...</p>}
@@ -230,7 +337,7 @@ export const Main = () => {
               {!messagesLoading && messages.length === 0 && (
                 <p className='no-messages'>No messages in this chat.</p>
               )}
-              {messages.map((msg) => (
+              {messages.map((msg, index) => (
                 <Message
                   key={msg._id}
                   receiverId={selectedChat.user._id}
@@ -239,6 +346,8 @@ export const Main = () => {
                     date: new Date(msg.createdAt).toLocaleString(),
                   }}
                   type={msg.senderId === authUser?._id ? "sender" : "receiver"}
+                  isSelected={msg.isSelected}
+                  ref={(el) => (messageRefs.current[index] = el)}
                 />
               ))}
               <div ref={messagesEndRef} />

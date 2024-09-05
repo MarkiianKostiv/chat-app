@@ -63,7 +63,6 @@
 }
 
 .sender-class > div > p {
-  background-color: #dedede;
   border-radius: 16px;
   text-align: center;
   padding: 10px 5px;
@@ -79,15 +78,26 @@
   justify-content: center;
   gap: 10px;
 }
+
 .receiver-class > div > p {
   color: #fff;
-  background-color: #3e4054;
   border-radius: 16px;
   text-align: center;
   padding: 10px 5px;
   font-size: 14px;
   font-weight: 400;
   max-width: 150px;
+}
+
+.selected {
+  background-color: #004494;
+}
+
+.no-selected-receiver {
+  background-color: #3e4054;
+}
+.no-selected-sender {
+  background-color: #dedede;
 }
 
 .receiver-class > div > span {

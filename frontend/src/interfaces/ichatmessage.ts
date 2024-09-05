@@ -5,4 +5,5 @@ export interface IChatMessage {
   senderId: string;
   updatedAt: Date;
   _id: string;
+  isSelected?: boolean;
 }
